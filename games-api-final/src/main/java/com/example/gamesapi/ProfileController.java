@@ -1,13 +1,53 @@
 package com.example.gamesapi;
-import org.springframework.data.domain.Page;import org.springframework.data.domain.Pageable;import org.springframework.web.bind.annotation.*;import jakarta.validation.Valid;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
+
+// Imports do Swagger
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/profiles")
-public class ProfileController{
-private final ProfileRepository r;
-public ProfileController(ProfileRepository r){this.r=r;}
-@GetMapping public Page<Profile> all(Pageable p){return r.findAll(p);}
-@PostMapping public Profile create(@Valid @RequestBody Profile o){return r.save(o);}
-@GetMapping("/{id}") public Profile one(@PathVariable Long id){return r.findById(id).orElseThrow();}
-@PutMapping("/{id}") public Profile update(@Valid @RequestBody Profile o,@PathVariable Long id){o.setId(id);return r.save(o);}
-@DeleteMapping("/{id}") public void delete(@PathVariable Long id){r.deleteById(id);}
+@Tag(name = "profile-controller", description = "Gerenciamento de perfis de jogadores/usuários")
+public class ProfileController {
+
+    private final ProfileRepository r;
+
+    public ProfileController(ProfileRepository r) {
+        this.r = r;
+    }
+
+    @Operation(summary = "Listar perfis", description = "Retorna uma lista paginada de todos os perfis cadastrados.")
+    @GetMapping 
+    public Page<Profile> all(Pageable p) {
+        return r.findAll(p);
+    }
+
+    @Operation(summary = "Criar perfil", description = "Adiciona um novo perfil ao banco de dados.")
+    @PostMapping 
+    public Profile create(@Valid @RequestBody Profile o) {
+        return r.save(o);
+    }
+
+    @Operation(summary = "Buscar perfil por ID", description = "Retorna os detalhes de um perfil específico pelo seu ID.")
+    @GetMapping("/{id}") 
+    public Profile one(@PathVariable Long id) {
+        return r.findById(id).orElseThrow();
+    }
+
+    @Operation(summary = "Atualizar perfil", description = "Altera as informações de um perfil já existente.")
+    @PutMapping("/{id}") 
+    public Profile update(@Valid @RequestBody Profile o, @PathVariable Long id) {
+        o.setId(id);
+        return r.save(o);
+    }
+
+    @Operation(summary = "Deletar perfil", description = "Remove permanentemente um perfil do banco de dados.")
+    @DeleteMapping("/{id}") 
+    public void delete(@PathVariable Long id) {
+        r.deleteById(id);
+    }
 }
