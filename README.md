@@ -82,6 +82,11 @@ JSON
 Passo 4: Listar os Jogos
 Endpoint: GET /games
 
+### Passo 4: Listar os Jogos (Com Paginação)
+A API implementa paginação nativa para garantir alta performance em grandes volumes de dados.
+- **Endpoint:** `GET /games`
+- **Parâmetros Opcionais:** `?page=0&size=10&sort=name,asc`
+- O retorno divide os dados no array `"content"` e fornece metadados de navegação no objeto `"pageable"`, facilitando a integração com interfaces Frontend (como Angular).
 Retorna o JSON completo com a lista de jogos, suas respectivas plataformas e desenvolvedoras.
 
 💻 Como executar o projeto localmente
