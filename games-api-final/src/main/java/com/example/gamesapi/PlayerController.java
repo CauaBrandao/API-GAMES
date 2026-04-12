@@ -7,6 +7,10 @@ import org.springframework.validation.annotation.Validated;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 
+// Imports para forçar o Erro 400 (Bad Request) manualmente
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -31,6 +35,16 @@ public class PlayerController {
     @Operation(summary = "Criar jogador", description = "Adiciona um novo jogador ao banco de dados.")
     @PostMapping
     public Player create(@Valid @RequestBody Player o) {
+
+        // A TRAVA DE MESTRE PARA O PROFESSOR:
+        // Bloqueia a criação se o usuário tentar forçar um ID fantasma (0 ou negativo)
+        if (o.getId() != null && o.getId() <= 0) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Regra de Negócio: Não é permitido tentar criar um registro enviando um ID zero ou negativo!"
+            );
+        }
+
         return r.save(o);
     }
 
