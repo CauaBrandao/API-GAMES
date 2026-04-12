@@ -3,14 +3,16 @@ package com.example.gamesapi;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.annotation.Validated;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 
-// Imports do Swagger
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/platforms")
+@Validated
 @Tag(name = "platform-controller", description = "Gerenciamento de plataformas de jogos")
 public class PlatformController {
 
@@ -32,22 +34,22 @@ public class PlatformController {
         return r.save(o);
     }
 
-    @Operation(summary = "Buscar plataforma por ID", description = "Retorna os detalhes de uma plataforma específica pelo seu ID.")
+    @Operation(summary = "Buscar plataforma por ID", description = "Retorna os detalhes de uma plataforma específica.")
     @GetMapping("/{id}")
-    public Platform one(@PathVariable Long id) {
+    public Platform one(@PathVariable @Positive(message = "O ID na URL deve ser maior que zero") Long id) {
         return r.findById(id).orElseThrow();
     }
 
     @Operation(summary = "Atualizar plataforma", description = "Altera as informações de uma plataforma já existente.")
     @PutMapping("/{id}")
-    public Platform update(@Valid @RequestBody Platform o, @PathVariable Long id) {
+    public Platform update(@Valid @RequestBody Platform o, @PathVariable @Positive(message = "O ID na URL deve ser maior que zero") Long id) {
         o.setId(id);
         return r.save(o);
     }
 
     @Operation(summary = "Deletar plataforma", description = "Remove permanentemente uma plataforma do banco de dados.")
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    public void delete(@PathVariable @Positive(message = "O ID na URL deve ser maior que zero") Long id) {
         r.deleteById(id);
     }
 }
