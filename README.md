@@ -14,7 +14,7 @@ O projeto foi construído com uma forte mentalidade de **Qualidade de Software**
 O projeto está hospedado em nuvem (Cloud) com pipeline de CI/CD configurada via Docker e Render.
 
 - **URL da API (Produção):** [Acessar API Games](https://api-games-94ep.onrender.com/games)
-- **Documentação Interativa (Swagger):** [Acessar Swagger UI](http://localhost:8080/swagger-ui/index.html)
+- **Documentação Interativa (Swagger):** [Acessar Swagger UI](https://api-games-94ep.onrender.com/swagger-ui/index.html#/player-controller/all_1)
   > *Nota: Como a aplicação está hospedada no plano gratuito do Render, o primeiro acesso pode levar até 50 segundos para "acordar" o servidor (Cold Start). Os acessos subsequentes são instantâneos.*
 
 ## ⚙️ Tecnologias Utilizadas
