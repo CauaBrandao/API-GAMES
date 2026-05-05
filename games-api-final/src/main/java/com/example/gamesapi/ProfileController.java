@@ -2,54 +2,56 @@ package com.example.gamesapi;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.server.ResponseStatusException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/profiles")
 @Validated
-@Tag(name = "profile-controller", description = "Gerenciamento de perfis de jogadores/usuários")
+@Tag(name = "profile-controller")
 public class ProfileController {
 
     private final ProfileRepository r;
+    public ProfileController(ProfileRepository r) { this.r = r; }
 
-    public ProfileController(ProfileRepository r) {
-        this.r = r;
-    }
-
-    @Operation(summary = "Listar perfis", description = "Retorna uma lista paginada de todos os perfis cadastrados.")
     @GetMapping
     public Page<Profile> all(Pageable p) {
-        return r.findAll(p);
+        Page<Profile> page = r.findAll(p);
+        page.forEach(prof -> prof.add(linkTo(methodOn(ProfileController.class).one(prof.getId())).withSelfRel()));
+        return page;
     }
 
-    @Operation(summary = "Criar perfil", description = "Adiciona um novo perfil ao banco de dados.")
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public Profile create(@Valid @RequestBody Profile o) {
-        return r.save(o);
+        if (o.getId() != null && o.getId() <= 0) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        Profile saved = r.save(o);
+        saved.add(linkTo(methodOn(ProfileController.class).one(saved.getId())).withSelfRel());
+        return saved;
     }
 
-    @Operation(summary = "Buscar perfil por ID", description = "Retorna os detalhes de um perfil específico.")
     @GetMapping("/{id}")
-    public Profile one(@PathVariable @Positive(message = "O ID na URL deve ser maior que zero") Long id) {
-        return r.findById(id).orElseThrow();
+    public Profile one(@PathVariable @Positive Long id) {
+        Profile prof = r.findById(id).orElseThrow();
+        prof.add(linkTo(methodOn(ProfileController.class).one(id)).withSelfRel());
+        return prof;
     }
 
-    @Operation(summary = "Atualizar perfil", description = "Altera as informações de um perfil já existente.")
     @PutMapping("/{id}")
-    public Profile update(@Valid @RequestBody Profile o, @PathVariable @Positive(message = "O ID na URL deve ser maior que zero") Long id) {
+    public Profile update(@Valid @RequestBody Profile o, @PathVariable @Positive Long id) {
         o.setId(id);
         return r.save(o);
     }
 
-    @Operation(summary = "Deletar perfil", description = "Remove permanentemente um perfil do banco de dados.")
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable @Positive(message = "O ID na URL deve ser maior que zero") Long id) {
-        r.deleteById(id);
-    }
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable @Positive Long id) { r.deleteById(id); }
 }

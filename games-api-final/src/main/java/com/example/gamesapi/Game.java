@@ -1,18 +1,56 @@
 package com.example.gamesapi;
-import jakarta.persistence.*;import jakarta.validation.constraints.*;import java.util.List;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import java.util.List;
+import org.springframework.hateoas.RepresentationModel;
+
+// IMPORT DA NOSSA TRAVA ANTI-LOOP AQUI:
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
-public class Game{
-@Id @GeneratedValue private Long id;
-@NotBlank private String name;
-@NotNull private Double price;
-@Enumerated(EnumType.STRING) private Genre genre;
-@ManyToMany private List<Platform> platforms;
-@ManyToOne private Developer developer;
-public Game(){}
-public Long getId(){return id;}public void setId(Long id){this.id=id;}
-public String getName(){return name;}public void setName(String n){this.name=n;}
-public Double getPrice(){return price;}public void setPrice(Double p){this.price=p;}
-public Genre getGenre(){return genre;}public void setGenre(Genre g){this.genre=g;}
-public List<Platform> getPlatforms(){return platforms;}public void setPlatforms(List<Platform> p){this.platforms=p;}
-public Developer getDeveloper(){return developer;}public void setDeveloper(Developer d){this.developer=d;}
+public class Game extends RepresentationModel<Game> {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @NotBlank
+    private String name;
+
+    @NotNull
+    private Double price;
+
+    @Enumerated(EnumType.STRING)
+    private Genre genre;
+
+    // A TRAVA APLICADA PARA NÃO ENTRAR EM LOOP COM AS PLATAFORMAS:
+    @JsonIgnore
+    @ManyToMany
+    private List<Platform> platforms;
+
+    // A TRAVA APLICADA PARA NÃO ENTRAR EM LOOP COM A DESENVOLVEDORA:
+    @JsonIgnore
+    @ManyToOne
+    private Developer developer;
+
+    public Game() {}
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getName() { return name; }
+    public void setName(String n) { this.name = n; }
+
+    public Double getPrice() { return price; }
+    public void setPrice(Double p) { this.price = p; }
+
+    public Genre getGenre() { return genre; }
+    public void setGenre(Genre g) { this.genre = g; }
+
+    public List<Platform> getPlatforms() { return platforms; }
+    public void setPlatforms(List<Platform> p) { this.platforms = p; }
+
+    public Developer getDeveloper() { return developer; }
+    public void setDeveloper(Developer d) { this.developer = d; }
 }

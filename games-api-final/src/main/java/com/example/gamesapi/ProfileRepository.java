@@ -1,1 +1,10 @@
-package com.example.gamesapi;import org.springframework.data.jpa.repository.JpaRepository;public interface ProfileRepository extends JpaRepository<Profile,Long>{}
+package com.example.gamesapi;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ProfileRepository extends JpaRepository<Profile, Long> {
+    // CORRIGIDO: Agora busca pelo nickname, que é o campo real da sua entidade!
+    Page<Profile> findByNicknameContainingIgnoreCase(String nickname, Pageable pageable);
+}
