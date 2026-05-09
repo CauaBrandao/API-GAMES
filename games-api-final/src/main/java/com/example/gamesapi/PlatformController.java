@@ -18,7 +18,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("/platforms")
+@RequestMapping("/v1/platforms")
 @Validated
 @Tag(name = "platform-controller", description = "Gerenciamento de plataformas")
 @ApiResponses(value = {

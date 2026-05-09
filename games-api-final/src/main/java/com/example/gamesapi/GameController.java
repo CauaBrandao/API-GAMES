@@ -18,7 +18,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("/games")
+@RequestMapping("/v1/games")
 @Validated
 @Tag(name = "game-controller", description = "Gerenciamento do catálogo")
 @ApiResponses(value = {

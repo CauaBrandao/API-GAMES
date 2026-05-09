@@ -14,7 +14,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("/profiles")
+@RequestMapping("/v1/profiles")
 @Validated
 @Tag(name = "profile-controller")
 public class ProfileController {

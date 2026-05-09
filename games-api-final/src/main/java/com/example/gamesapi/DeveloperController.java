@@ -18,7 +18,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("/developers")
+@RequestMapping("/v1/developers")
 @Validated
 @Tag(name = "developer-controller", description = "Gerenciamento de desenvolvedoras")
 @ApiResponses(value = {

@@ -14,7 +14,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("/players")
+@RequestMapping("/v1/players")
 @Validated
 @Tag(name = "player-controller")
 public class PlayerController {
