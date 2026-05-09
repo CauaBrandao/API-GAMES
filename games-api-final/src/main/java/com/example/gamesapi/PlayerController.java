@@ -11,6 +11,7 @@ import jakarta.validation.constraints.Positive;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
@@ -20,7 +21,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class PlayerController {
 
     private final PlayerRepository r;
-    public PlayerController(PlayerRepository r) { this.r = r; }
+    // 1. Injetamos o nosso serviço de Idempotência aqui
+    private final IdempotencyService idempotencyService;
+
+    public PlayerController(PlayerRepository r, IdempotencyService idempotencyService) {
+        this.r = r;
+        this.idempotencyService = idempotencyService;
+    }
 
     @GetMapping
     public Page<Player> all(Pageable p) {
@@ -29,10 +36,20 @@ public class PlayerController {
         return page;
     }
 
+    // 2. Trava de Idempotência adicionada no POST!
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Player create(@Valid @RequestBody Player o) {
+    public Player create(
+            @Valid @RequestBody Player o,
+            @Parameter(description = "Chave de Idempotência (ex: 12345)") @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
+
+        // Verifica se a chave já foi usada
+        if (idempotencyKey != null && idempotencyService.isProcessed(idempotencyKey)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Requisição duplicada bloqueada! Esta chave de idempotência já foi processada.");
+        }
+
         if (o.getId() != null && o.getId() <= 0) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+
         Player saved = r.save(o);
         saved.add(linkTo(methodOn(PlayerController.class).one(saved.getId())).withSelfRel());
         return saved;
