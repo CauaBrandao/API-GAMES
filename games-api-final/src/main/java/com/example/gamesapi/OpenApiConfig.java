@@ -1,6 +1,7 @@
 package com.example.gamesapi;
 
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
@@ -12,11 +13,23 @@ public class OpenApiConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
-                .info(new Info().title("Game Catalog API").version("v1.0.0"))
-                // Adiciona a exigência de segurança na documentação
+                .info(new Info()
+                        .title("Game Catalog API")
+                        .version("v1.0.0")
+                        // Texto completo, profissional e detalhado (usando \n para quebrar linhas no Swagger)
+                        .description("Bem-vindo à documentação oficial da Game Catalog API, desenvolvida como projeto final de Spring Boot. <br><br>" +
+                                "Esta API RESTful robusta permite o gerenciamento completo de um ecossistema de jogos, incluindo o controle de plataformas, desenvolvedoras, jogos, jogadores e seus respectivos perfis. <br><br>" +
+                                "Projetada com as melhores práticas de mercado, a aplicação implementa recursos avançados de arquitetura de software, tais como: navegação inteligente de dados via **HATEOAS**, políticas de segurança **CORS** para integração com aplicações front-end, **Versionamento** de endpoints (v1 e v2) para garantir a evolução segura do contrato, mecanismos de **Idempotência** para prevenir a duplicação de dados em requisições críticas e proteção global das rotas através de autenticação via **API Key**.")
+
+                        // O Contato completo força o Swagger a exibir o seu nome clicável!
+                        .contact(new Contact()
+                                .name("Desenvolvido por: Seu Nome Aqui")
+                                .email("seu.email@faculdade.com") // Coloque seu email real
+                                .url("https://github.com/seugithub"))) // Pode ser seu GitHub ou LinkedIn
+
+                // Configurações do Cadeado (Segurança)
                 .addSecurityItem(new SecurityRequirement().addList("ApiKeyAuth"))
                 .components(new io.swagger.v3.oas.models.Components()
-                        // Cria o campo onde vamos digitar a senha no Swagger
                         .addSecuritySchemes("ApiKeyAuth", new SecurityScheme()
                                 .name("X-API-KEY")
                                 .type(SecurityScheme.Type.APIKEY)
