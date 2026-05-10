@@ -23,9 +23,9 @@ public class OpenApiConfig {
 
                         // O Contato completo força o Swagger a exibir o seu nome clicável!
                         .contact(new Contact()
-                                .name("Desenvolvido por: Seu Nome Aqui")
-                                .email("seu.email@faculdade.com") // Coloque seu email real
-                                .url("https://github.com/seugithub"))) // Pode ser seu GitHub ou LinkedIn
+                                .name("Cauã Brandão Moreira")
+                                .email("cauamoreira.brandao@hotmail.com") // Coloque seu email real
+                                .url("https://github.com/CauaBrandao"))) // Pode ser seu GitHub ou LinkedIn
 
                 // Configurações do Cadeado (Segurança)
                 .addSecurityItem(new SecurityRequirement().addList("ApiKeyAuth"))
