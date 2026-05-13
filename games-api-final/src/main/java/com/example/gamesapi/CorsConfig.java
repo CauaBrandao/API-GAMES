@@ -9,23 +9,26 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class CorsConfig implements WebMvcConfigurer {
 
     private final ApiKeyInterceptor apiKeyInterceptor;
+    private final RateLimitInterceptor rateLimitInterceptor;
 
-    // Injeta o segurança que acabamos de criar
-    public CorsConfig(ApiKeyInterceptor apiKeyInterceptor) {
+    // Injeta os interceptors de segurança e rate limit
+    public CorsConfig(ApiKeyInterceptor apiKeyInterceptor, RateLimitInterceptor rateLimitInterceptor) {
         this.apiKeyInterceptor = apiKeyInterceptor;
+        this.rateLimitInterceptor = rateLimitInterceptor;
     }
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("*")
+                .allowedOrigins("http://localhost:3000", "http://localhost:8080")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*");
     }
 
-    // Liga o segurança em todas as rotas
+    // Liga os interceptors em todas as rotas
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(rateLimitInterceptor);
         registry.addInterceptor(apiKeyInterceptor);
     }
 }

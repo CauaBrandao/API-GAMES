@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("/v2/players") // <-- AQUI ESTÁ A MÁGICA DA VERSÃO 2
+@RequestMapping("/v2/players")
 @Tag(name = "player-controller-v2", description = "Gerenciamento de jogadores (Versão 2 - Otimizada)")
 public class PlayerControllerV2 {
 
@@ -17,13 +17,17 @@ public class PlayerControllerV2 {
         this.r = r;
     }
 
-    @Operation(summary = "Listar jogadores (V2)", description = "Nova versão da listagem, pronta para futuras quebras de contrato.")
-    @GetMapping
-    public Page<Player> allV2(Pageable p) {
-        // Na vida real, a V2 teria regras diferentes, DTOs diferentes, etc.
-        // Aqui, retornamos os mesmos dados, mas provamos que a rota /v2/ existe e funciona isolada da /v1/!
+    @Operation(summary = "Listar jogadores (V2)", description = "Nova versão da listagem, acessível via URL /v2/ ou header X-API-Version: 2.")
+    @GetMapping(headers = "X-API-Version=2")
+    public Page<Player> allV2ByHeader(Pageable p) {
+        // Acessível via header X-API-Version: 2
         return r.findAll(p);
     }
 
-    // Deixamos apenas o GET para provar o conceito da V2 sem duplicar código desnecessário.
+    @Operation(summary = "Listar jogadores (V2 - via URL)", description = "Nova versão da listagem via versionamento por URL.")
+    @GetMapping
+    public Page<Player> allV2(Pageable p) {
+        // Acessível via URL /v2/players
+        return r.findAll(p);
+    }
 }
