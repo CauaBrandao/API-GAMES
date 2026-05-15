@@ -11,14 +11,13 @@ import java.util.concurrent.ConcurrentMap;
 @Component
 public class RateLimitInterceptor implements HandlerInterceptor {
 
-    // Limite: 50 requisições por janela de tempo
+    // Limite: 50 requisicoes por janela de tempo
     private static final int MAX_REQUESTS = 50;
     // Janela de tempo: 60 segundos
     private static final long WINDOW_MS = 60_000;
 
     // Armazena contagem e timestamp por IP
     private final ConcurrentMap<String, long[]> requestCounts = new ConcurrentHashMap<>();
-    // requestCounts value: long[]{count, windowStartTimestamp}
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -27,7 +26,6 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
         long[] record = requestCounts.compute(clientIp, (key, existing) -> {
             if (existing == null || (now - existing[1]) > WINDOW_MS) {
-                // Nova janela
                 return new long[]{1, now};
             }
             existing[0]++;
@@ -47,8 +45,9 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             response.setStatus(429);
             response.setHeader("Retry-After", String.valueOf(retryAfterSeconds));
             response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
             response.getWriter().write(
-                    "{\"status\":429,\"error\":\"Too Many Requests\",\"message\":\"Limite de requisições excedido. Tente novamente em " + retryAfterSeconds + " segundos.\"}");
+                    "{\"status\":429,\"error\":\"Too Many Requests\",\"message\":\"Limite de requisicoes excedido. Tente novamente em " + retryAfterSeconds + " segundos.\"}");
             return false;
         }
 

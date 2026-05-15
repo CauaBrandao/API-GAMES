@@ -4,11 +4,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 @RestController
-@RequestMapping("/v2/players")
-@Tag(name = "player-controller-v2", description = "Gerenciamento de jogadores (Versão 2 - Otimizada)")
+@Tag(name = "player-controller-v2", description = "Gerenciamento de jogadores (Versao 2 - Otimizada)")
 public class PlayerControllerV2 {
 
     private final PlayerRepository r;
@@ -17,17 +21,31 @@ public class PlayerControllerV2 {
         this.r = r;
     }
 
-    @Operation(summary = "Listar jogadores (V2)", description = "Nova versão da listagem, acessível via URL /v2/ ou header X-API-Version: 2.")
-    @GetMapping(headers = "X-API-Version=2")
-    public Page<Player> allV2ByHeader(Pageable p) {
-        // Acessível via header X-API-Version: 2
-        return r.findAll(p);
+    // Versionamento via URL: /v2/players
+    @Operation(summary = "Listar jogadores (V2 - via URL)", description = "Nova versao da listagem via versionamento por URL.")
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "Lista retornada com sucesso (V2)")})
+    @GetMapping("/v2/players")
+    public Page<Player> allV2(Pageable p) {
+        Page<Player> page = r.findAll(p);
+        page.forEach(player -> {
+            if (!player.hasLink("self")) {
+                player.add(linkTo(methodOn(PlayerControllerV2.class).allV2(Pageable.unpaged())).withSelfRel());
+            }
+        });
+        return page;
     }
 
-    @Operation(summary = "Listar jogadores (V2 - via URL)", description = "Nova versão da listagem via versionamento por URL.")
-    @GetMapping
-    public Page<Player> allV2(Pageable p) {
-        // Acessível via URL /v2/players
-        return r.findAll(p);
+    // Versionamento via header: X-API-Version: 2 no path /v1/players
+    @Operation(summary = "Listar jogadores (V2 - via Header)", description = "Nova versao da listagem acessivel via header X-API-Version: 2 no endpoint /v1/players.")
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "Lista retornada com sucesso (V2 via header)")})
+    @GetMapping(value = "/v1/players", headers = "X-API-Version=2")
+    public Page<Player> allV2ByHeader(Pageable p) {
+        Page<Player> page = r.findAll(p);
+        page.forEach(player -> {
+            if (!player.hasLink("self")) {
+                player.add(linkTo(methodOn(PlayerControllerV2.class).allV2ByHeader(Pageable.unpaged())).withSelfRel());
+            }
+        });
+        return page;
     }
 }

@@ -19,8 +19,10 @@ public class Game extends RepresentationModel<Game> {
     private String name;
 
     @NotNull
+    @Positive
     private Double price;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     private Genre genre;
 
