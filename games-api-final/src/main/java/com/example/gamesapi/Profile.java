@@ -2,6 +2,7 @@ package com.example.gamesapi;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Min;
 import org.springframework.hateoas.RepresentationModel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -16,6 +17,7 @@ public class Profile extends RepresentationModel<Profile> {
     private String nickname;
 
     @NotNull
+    @Min(0)
     private Integer level;
 
     @JsonIgnore

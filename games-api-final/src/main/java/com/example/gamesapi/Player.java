@@ -16,6 +16,7 @@ public class Player extends RepresentationModel<Player> {
     @NotBlank
     private String name;
 
+    @NotBlank
     @Email
     private String email;
 
