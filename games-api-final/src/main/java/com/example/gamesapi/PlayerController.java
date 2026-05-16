@@ -19,7 +19,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("/v1/players")
 @Validated
-// 1. DESCRIÇÃO ADICIONADA AQUI PARA PADRONIZAR O SWAGGER
+
 @Tag(name = "player-controller", description = "Gerenciamento de jogadores")
 public class PlayerController {
 
@@ -57,7 +57,7 @@ public class PlayerController {
 
     @GetMapping("/{id}")
     public Player one(@PathVariable @Positive Long id) {
-        // 2. AJUSTE DO PROTOCOLO: Retorna 404 se não achar o jogador
+        
         Player player = r.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Jogador não encontrado!"));
         player.add(linkTo(methodOn(PlayerController.class).one(id)).withSelfRel());
         return player;
@@ -72,7 +72,7 @@ public class PlayerController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable @Positive Long id) {
-        // 3. AJUSTE DO PROTOCOLO: Retorna 404 antes de tentar deletar algo que não existe
+        
         if (!r.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Jogador não encontrado para exclusão!");
         }
