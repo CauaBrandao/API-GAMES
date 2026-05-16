@@ -12,6 +12,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
@@ -82,6 +84,9 @@ public class PlayerController {
     @GetMapping("/search")
     public Page<Player> searchByName(@RequestParam String name, Pageable p) {
         Page<Player> page = r.findByNameContainingIgnoreCase(name, p);
+        if (page.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nenhum jogador encontrado com o nome: " + name);
+        }
         page.forEach(this::addLinks);
         return page;
     }

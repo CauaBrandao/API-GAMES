@@ -11,6 +11,8 @@ import jakarta.validation.constraints.Positive;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
@@ -62,7 +64,6 @@ public class ProfileController {
         }
         r.deleteById(id);
     }
-<<<<<<< HEAD
 
     @Operation(summary = "Buscar perfis por nickname")
     @ApiResponses({@ApiResponse(responseCode = "200", description = "Resultados da busca")})
@@ -81,6 +82,4 @@ public class ProfileController {
             prof.add(linkTo(methodOn(ProfileController.class).one(prof.getId())).withSelfRel());
         }
     }
-=======
->>>>>>> c16ac27b7fcd9d321cb4e8a08d7be7b66f6df8d3
 }
