@@ -19,7 +19,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("/v1/players")
 @Validated
-
 @Tag(name = "player-controller", description = "Gerenciamento de jogadores")
 public class PlayerController {
 
@@ -31,56 +30,91 @@ public class PlayerController {
         this.idempotencyService = idempotencyService;
     }
 
+    @Operation(summary = "Listar jogadores (paginado)")
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")})
     @GetMapping
     public Page<Player> all(Pageable p) {
         Page<Player> page = r.findAll(p);
-        page.forEach(player -> player.add(linkTo(methodOn(PlayerController.class).one(player.getId())).withSelfRel()));
+        page.forEach(this::addLinks);
         return page;
     }
 
+    @Operation(summary = "Criar jogador")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Jogador criado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Erro de validacao"),
+            @ApiResponse(responseCode = "409", description = "Requisicao duplicada")
+    })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Player create(
             @Valid @RequestBody Player o,
-            @Parameter(description = "Chave de Idempotência (ex: 12345)") @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
+            @Parameter(description = "Chave de Idempotencia") @RequestHeader(value = "X-Idempotency-Key", required = false) String idempotencyKey) {
 
         if (idempotencyKey != null && idempotencyService.isProcessed(idempotencyKey)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Requisição duplicada bloqueada! Esta chave de idempotência já foi processada.");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Requisicao duplicada bloqueada!");
         }
 
-        if (o.getId() != null && o.getId() <= 0) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        if (o.getId() != null && o.getId() <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ID invalido!");
+        }
 
         Player saved = r.save(o);
-        saved.add(linkTo(methodOn(PlayerController.class).one(saved.getId())).withSelfRel());
+        addLinks(saved);
+        saved.add(linkTo(methodOn(PlayerController.class).all(Pageable.unpaged())).withRel("todos_jogadores"));
         return saved;
     }
 
+    @Operation(summary = "Buscar jogador por ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Jogador encontrado"),
+            @ApiResponse(responseCode = "404", description = "Jogador nao encontrado")
+    })
     @GetMapping("/{id}")
     public Player one(@PathVariable @Positive Long id) {
-
-        Player player = r.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Jogador não encontrado!"));
-        player.add(linkTo(methodOn(PlayerController.class).one(id)).withSelfRel());
+        Player player = r.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Jogador com ID " + id + " nao encontrado."));
+        addLinks(player);
+        player.add(linkTo(methodOn(PlayerController.class).all(Pageable.unpaged())).withRel("todos_jogadores"));
         return player;
     }
 
+    @Operation(summary = "Atualizar jogador")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Jogador atualizado"),
+            @ApiResponse(responseCode = "400", description = "Erro de validacao"),
+            @ApiResponse(responseCode = "404", description = "Jogador nao encontrado")
+    })
     @PutMapping("/{id}")
     public Player update(@Valid @RequestBody Player o, @PathVariable @Positive Long id) {
+        if (!r.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Jogador com ID " + id + " nao encontrado.");
+        }
         o.setId(id);
-        return r.save(o);
+        Player saved = r.save(o);
+        addLinks(saved);
+        return saved;
     }
 
+    @Operation(summary = "Deletar jogador")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Jogador deletado"),
+            @ApiResponse(responseCode = "404", description = "Jogador nao encontrado")
+    })
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable @Positive Long id) {
-
         if (!r.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Jogador não encontrado para exclusão!");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Jogador com ID " + id + " nao encontrado.");
         }
         r.deleteById(id);
     }
 
     @Operation(summary = "Buscar jogadores por nome")
-    @ApiResponses({@ApiResponse(responseCode = "200", description = "Resultados da busca")})
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Resultados da busca"),
+            @ApiResponse(responseCode = "404", description = "Nenhum jogador encontrado")
+    })
     @GetMapping("/search")
     public Page<Player> searchByName(@RequestParam String name, Pageable p) {
         Page<Player> page = r.findByNameContainingIgnoreCase(name, p);
