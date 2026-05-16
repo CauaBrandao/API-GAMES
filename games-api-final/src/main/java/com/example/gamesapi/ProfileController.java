@@ -59,4 +59,25 @@ public class ProfileController {
         }
         r.deleteById(id);
     }
+<<<<<<< HEAD
+
+    @Operation(summary = "Buscar perfis por nickname")
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "Resultados da busca")})
+    @GetMapping("/search")
+    public Page<Profile> searchByNickname(@RequestParam String nickname, Pageable p) {
+        Page<Profile> page = r.findByNicknameContainingIgnoreCase(nickname, p);
+        if (page.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nenhum perfil encontrado com o nickname: " + nickname);
+        }
+        page.forEach(this::addLinks);
+        return page;
+    }
+
+    private void addLinks(Profile prof) {
+        if (!prof.hasLink("self")) {
+            prof.add(linkTo(methodOn(ProfileController.class).one(prof.getId())).withSelfRel());
+        }
+    }
+=======
+>>>>>>> c16ac27b7fcd9d321cb4e8a08d7be7b66f6df8d3
 }

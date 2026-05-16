@@ -106,6 +106,9 @@ public class PlatformController {
     @GetMapping("/search")
     public Page<Platform> searchByName(@RequestParam String name, Pageable p) {
         Page<Platform> page = r.findByNameContainingIgnoreCase(name, p);
+        if (page.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nenhuma plataforma encontrada com o nome: " + name);
+        }
         page.forEach(this::addLinks);
         return page;
     }

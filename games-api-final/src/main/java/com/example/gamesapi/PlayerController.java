@@ -76,4 +76,19 @@ public class PlayerController {
         }
         r.deleteById(id);
     }
+
+    @Operation(summary = "Buscar jogadores por nome")
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "Resultados da busca")})
+    @GetMapping("/search")
+    public Page<Player> searchByName(@RequestParam String name, Pageable p) {
+        Page<Player> page = r.findByNameContainingIgnoreCase(name, p);
+        page.forEach(this::addLinks);
+        return page;
+    }
+
+    private void addLinks(Player player) {
+        if (!player.hasLink("self")) {
+            player.add(linkTo(methodOn(PlayerController.class).one(player.getId())).withSelfRel());
+        }
+    }
 }

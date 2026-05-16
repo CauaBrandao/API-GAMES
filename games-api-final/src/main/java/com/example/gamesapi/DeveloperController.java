@@ -106,6 +106,9 @@ public class DeveloperController {
     @GetMapping("/search")
     public Page<Developer> searchByName(@RequestParam String name, Pageable p) {
         Page<Developer> page = r.findByNameContainingIgnoreCase(name, p);
+        if (page.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nenhuma desenvolvedora encontrada com o nome: " + name);
+        }
         page.forEach(this::addLinks);
         return page;
     }
