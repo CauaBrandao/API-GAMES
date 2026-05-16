@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import java.util.List;
 import org.springframework.hateoas.RepresentationModel;
-
-// IMPORT DA NOSSA TRAVA ANTI-LOOP AQUI:
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
@@ -26,12 +24,10 @@ public class Game extends RepresentationModel<Game> {
     @Enumerated(EnumType.STRING)
     private Genre genre;
 
-    // A TRAVA APLICADA PARA NÃO ENTRAR EM LOOP COM AS PLATAFORMAS:
     @JsonIgnore
     @ManyToMany
     private List<Platform> platforms;
 
-    // A TRAVA APLICADA PARA NÃO ENTRAR EM LOOP COM A DESENVOLVEDORA:
     @JsonIgnore
     @ManyToOne
     private Developer developer;

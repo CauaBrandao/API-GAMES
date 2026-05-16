@@ -12,12 +12,9 @@ import java.util.concurrent.ConcurrentMap;
 @Component
 public class RateLimitInterceptor implements HandlerInterceptor {
 
-    // Limite: 50 requisicoes por janela de tempo
     private static final int MAX_REQUESTS = 50;
-    // Janela de tempo: 60 segundos
     private static final long WINDOW_MS = 60_000;
 
-    // Armazena contagem e timestamp por IP
     private final ConcurrentMap<String, long[]> requestCounts = new ConcurrentHashMap<>();
 
     @Override
@@ -38,7 +35,6 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         long remaining = MAX_REQUESTS - count;
         long retryAfterSeconds = Math.max(1, (WINDOW_MS - (now - windowStart)) / 1000);
 
-        // Headers informativos sobre o rate limit
         response.setHeader("X-RateLimit-Limit", String.valueOf(MAX_REQUESTS));
         response.setHeader("X-RateLimit-Remaining", String.valueOf(Math.max(0, remaining)));
 

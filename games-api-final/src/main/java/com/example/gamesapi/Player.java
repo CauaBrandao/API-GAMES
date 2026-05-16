@@ -2,11 +2,9 @@ package com.example.gamesapi;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-// 1. Import mágico do HATEOAS adicionado:
 import org.springframework.hateoas.RepresentationModel;
 
 @Entity
-// 2. Herança adicionada aqui:
 public class Player extends RepresentationModel<Player> {
 
     @Id

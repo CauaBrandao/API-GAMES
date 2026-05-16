@@ -21,7 +21,6 @@ public class PlayerControllerV2 {
         this.r = r;
     }
 
-    // Versionamento via URL: /v2/players
     @Operation(summary = "Listar jogadores (V2 - via URL)", description = "Nova versao da listagem via versionamento por URL.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso (V2)"),
@@ -40,7 +39,6 @@ public class PlayerControllerV2 {
         return page;
     }
 
-    // Versionamento via header: X-API-Version: 2 no path /v1/players
     @Operation(summary = "Listar jogadores (V2 - via Header)", description = "Nova versao da listagem acessivel via header X-API-Version: 2 no endpoint /v1/players.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso (V2 via header)"),
