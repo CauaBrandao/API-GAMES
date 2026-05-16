@@ -149,7 +149,7 @@ public class PlatformController {
         if (!plat.hasLink("self")) {
             plat.add(linkTo(methodOn(PlatformController.class).one(plat.getId())).withSelfRel());
             plat.add(linkTo(methodOn(PlatformController.class).update(null, plat.getId())).withRel("update"));
-            plat.add(linkTo(methodOn(PlatformController.class).delete(plat.getId())).withRel("delete"));
+            plat.add(linkTo(PlatformController.class).slash(plat.getId()).withRel("delete"));
         }
     }
 }

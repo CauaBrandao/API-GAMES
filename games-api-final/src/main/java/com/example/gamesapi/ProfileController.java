@@ -149,7 +149,7 @@ public class ProfileController {
         if (!prof.hasLink("self")) {
             prof.add(linkTo(methodOn(ProfileController.class).one(prof.getId())).withSelfRel());
             prof.add(linkTo(methodOn(ProfileController.class).update(null, prof.getId())).withRel("update"));
-            prof.add(linkTo(methodOn(ProfileController.class).delete(prof.getId())).withRel("delete"));
+            prof.add(linkTo(ProfileController.class).slash(prof.getId()).withRel("delete"));
         }
     }
 }

@@ -149,7 +149,7 @@ public class PlayerController {
         if (!player.hasLink("self")) {
             player.add(linkTo(methodOn(PlayerController.class).one(player.getId())).withSelfRel());
             player.add(linkTo(methodOn(PlayerController.class).update(null, player.getId())).withRel("update"));
-            player.add(linkTo(methodOn(PlayerController.class).delete(player.getId())).withRel("delete"));
+            player.add(linkTo(PlayerController.class).slash(player.getId()).withRel("delete"));
         }
     }
 }

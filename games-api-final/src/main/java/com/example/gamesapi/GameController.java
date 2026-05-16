@@ -154,7 +154,7 @@ public class GameController {
         if (!game.hasLink("self")) {
             game.add(linkTo(methodOn(GameController.class).one(game.getId())).withSelfRel());
             game.add(linkTo(methodOn(GameController.class).update(null, game.getId())).withRel("update"));
-            game.add(linkTo(methodOn(GameController.class).delete(game.getId())).withRel("delete"));
+            game.add(linkTo(GameController.class).slash(game.getId()).withRel("delete"));
         }
     }
 }

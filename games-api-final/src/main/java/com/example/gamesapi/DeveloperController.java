@@ -154,7 +154,7 @@ public class DeveloperController {
         if (!dev.hasLink("self")) {
             dev.add(linkTo(methodOn(DeveloperController.class).one(dev.getId())).withSelfRel());
             dev.add(linkTo(methodOn(DeveloperController.class).update(null, dev.getId())).withRel("update"));
-            dev.add(linkTo(methodOn(DeveloperController.class).delete(dev.getId())).withRel("delete"));
+            dev.add(linkTo(DeveloperController.class).slash(dev.getId()).withRel("delete"));
         }
     }
 }
