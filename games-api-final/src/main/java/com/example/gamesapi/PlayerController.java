@@ -12,12 +12,14 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/v1/players")
 @Validated
-// 1. DESCRIÇÃO ADICIONADA AQUI PARA PADRONIZAR O SWAGGER
+
 @Tag(name = "player-controller", description = "Gerenciamento de jogadores")
 public class PlayerController {
 
@@ -55,7 +57,7 @@ public class PlayerController {
 
     @GetMapping("/{id}")
     public Player one(@PathVariable @Positive Long id) {
-        // 2. AJUSTE DO PROTOCOLO: Retorna 404 se não achar o jogador
+
         Player player = r.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Jogador não encontrado!"));
         player.add(linkTo(methodOn(PlayerController.class).one(id)).withSelfRel());
         return player;
@@ -70,7 +72,7 @@ public class PlayerController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable @Positive Long id) {
-        // 3. AJUSTE DO PROTOCOLO: Retorna 404 antes de tentar deletar algo que não existe
+
         if (!r.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Jogador não encontrado para exclusão!");
         }
@@ -82,6 +84,9 @@ public class PlayerController {
     @GetMapping("/search")
     public Page<Player> searchByName(@RequestParam String name, Pageable p) {
         Page<Player> page = r.findByNameContainingIgnoreCase(name, p);
+        if (page.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nenhum jogador encontrado com o nome: " + name);
+        }
         page.forEach(this::addLinks);
         return page;
     }
