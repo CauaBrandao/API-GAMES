@@ -106,6 +106,9 @@ public class GameController {
     @GetMapping("/search")
     public Page<Game> searchByName(@RequestParam String name, Pageable p) {
         Page<Game> page = r.findByNameContainingIgnoreCase(name, p);
+        if (page.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nenhum jogo encontrado com o nome: " + name);
+        }
         page.forEach(this::addLinks);
         return page;
     }

@@ -110,6 +110,9 @@ public class PlayerController {
     @GetMapping("/search")
     public Page<Player> searchByName(@RequestParam String name, Pageable p) {
         Page<Player> page = r.findByNameContainingIgnoreCase(name, p);
+        if (page.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nenhum jogador encontrado com o nome: " + name);
+        }
         page.forEach(this::addLinks);
         return page;
     }

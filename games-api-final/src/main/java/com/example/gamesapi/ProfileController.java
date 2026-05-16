@@ -98,6 +98,9 @@ public class ProfileController {
     @GetMapping("/search")
     public Page<Profile> searchByNickname(@RequestParam String nickname, Pageable p) {
         Page<Profile> page = r.findByNicknameContainingIgnoreCase(nickname, p);
+        if (page.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nenhum perfil encontrado com o nickname: " + nickname);
+        }
         page.forEach(this::addLinks);
         return page;
     }
