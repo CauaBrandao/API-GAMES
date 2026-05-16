@@ -5,6 +5,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import java.time.LocalDateTime;
+
 @Component
 public class ApiKeyInterceptor implements HandlerInterceptor {
 
@@ -33,7 +35,8 @@ public class ApiKeyInterceptor implements HandlerInterceptor {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
-            response.getWriter().write("{\"status\":401,\"error\":\"Acesso Negado\",\"message\":\"Chave da API invalida ou ausente! Envie o header X-API-KEY com o valor correto.\"}");
+            response.getWriter().write(
+                    "{\"timestamp\":\"" + LocalDateTime.now() + "\",\"status\":401,\"error\":\"Acesso Negado\",\"message\":\"Chave da API invalida ou ausente! Envie o header X-API-KEY com o valor correto.\"}");
             return false; // Bloqueia a requisicao!
         }
     }

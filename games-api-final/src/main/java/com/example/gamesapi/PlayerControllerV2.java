@@ -23,7 +23,12 @@ public class PlayerControllerV2 {
 
     // Versionamento via URL: /v2/players
     @Operation(summary = "Listar jogadores (V2 - via URL)", description = "Nova versao da listagem via versionamento por URL.")
-    @ApiResponses({@ApiResponse(responseCode = "200", description = "Lista retornada com sucesso (V2)")})
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso (V2)"),
+            @ApiResponse(responseCode = "401", description = "Chave da API invalida ou ausente"),
+            @ApiResponse(responseCode = "429", description = "Limite de requisicoes excedido"),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     @GetMapping("/v2/players")
     public Page<Player> allV2(Pageable p) {
         Page<Player> page = r.findAll(p);
@@ -37,7 +42,12 @@ public class PlayerControllerV2 {
 
     // Versionamento via header: X-API-Version: 2 no path /v1/players
     @Operation(summary = "Listar jogadores (V2 - via Header)", description = "Nova versao da listagem acessivel via header X-API-Version: 2 no endpoint /v1/players.")
-    @ApiResponses({@ApiResponse(responseCode = "200", description = "Lista retornada com sucesso (V2 via header)")})
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso (V2 via header)"),
+            @ApiResponse(responseCode = "401", description = "Chave da API invalida ou ausente"),
+            @ApiResponse(responseCode = "429", description = "Limite de requisicoes excedido"),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     @GetMapping(value = "/v1/players", headers = "X-API-Version=2")
     public Page<Player> allV2ByHeader(Pageable p) {
         Page<Player> page = r.findAll(p);

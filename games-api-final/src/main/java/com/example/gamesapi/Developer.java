@@ -19,6 +19,10 @@ public class Developer extends RepresentationModel<Developer> {
     @NotBlank
     private String country;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @OneToMany(mappedBy = "developer")
+    private java.util.List<Game> games;
+
     public Developer() {}
 
     public Long getId() { return id; }
@@ -29,4 +33,7 @@ public class Developer extends RepresentationModel<Developer> {
 
     public String getCountry() { return country; }
     public void setCountry(String c) { this.country = c; }
+
+    public java.util.List<Game> getGames() { return games; }
+    public void setGames(java.util.List<Game> games) { this.games = games; }
 }

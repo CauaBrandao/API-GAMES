@@ -11,6 +11,7 @@ import jakarta.validation.constraints.Positive;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,10 +23,20 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class ProfileController {
 
     private final ProfileRepository r;
-    public ProfileController(ProfileRepository r) { this.r = r; }
+    private final IdempotencyService idempotencyService;
+
+    public ProfileController(ProfileRepository r, IdempotencyService idempotencyService) {
+        this.r = r;
+        this.idempotencyService = idempotencyService;
+    }
 
     @Operation(summary = "Listar perfis (paginado)")
-    @ApiResponses({@ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")})
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso"),
+            @ApiResponse(responseCode = "401", description = "Chave da API invalida ou ausente"),
+            @ApiResponse(responseCode = "429", description = "Limite de requisicoes excedido"),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     @GetMapping
     public Page<Profile> all(Pageable p) {
         Page<Profile> page = r.findAll(p);
@@ -36,11 +47,20 @@ public class ProfileController {
     @Operation(summary = "Criar perfil")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Perfil criado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Erro de validacao")
+            @ApiResponse(responseCode = "400", description = "Erro de validacao nos dados enviados"),
+            @ApiResponse(responseCode = "401", description = "Chave da API invalida ou ausente"),
+            @ApiResponse(responseCode = "409", description = "Requisicao duplicada (Idempotency-Key ja utilizada)"),
+            @ApiResponse(responseCode = "429", description = "Limite de requisicoes excedido"),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Profile create(@Valid @RequestBody Profile o) {
+    public Profile create(
+            @Valid @RequestBody Profile o,
+            @Parameter(description = "Chave de Idempotencia") @RequestHeader(value = "X-Idempotency-Key", required = false) String idempotencyKey) {
+        if (idempotencyKey != null && idempotencyService.isProcessed(idempotencyKey)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Requisicao duplicada bloqueada!");
+        }
         if (o.getId() != null && o.getId() <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ID invalido!");
         }
@@ -53,7 +73,11 @@ public class ProfileController {
     @Operation(summary = "Buscar perfil por ID")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Perfil encontrado"),
-            @ApiResponse(responseCode = "404", description = "Perfil nao encontrado")
+            @ApiResponse(responseCode = "400", description = "ID informado e invalido"),
+            @ApiResponse(responseCode = "401", description = "Chave da API invalida ou ausente"),
+            @ApiResponse(responseCode = "404", description = "Perfil nao encontrado"),
+            @ApiResponse(responseCode = "429", description = "Limite de requisicoes excedido"),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     })
     @GetMapping("/{id}")
     public Profile one(@PathVariable @Positive Long id) {
@@ -66,9 +90,12 @@ public class ProfileController {
 
     @Operation(summary = "Atualizar perfil")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Perfil atualizado"),
-            @ApiResponse(responseCode = "400", description = "Erro de validacao"),
-            @ApiResponse(responseCode = "404", description = "Perfil nao encontrado")
+            @ApiResponse(responseCode = "200", description = "Perfil atualizado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Erro de validacao nos dados enviados"),
+            @ApiResponse(responseCode = "401", description = "Chave da API invalida ou ausente"),
+            @ApiResponse(responseCode = "404", description = "Perfil nao encontrado"),
+            @ApiResponse(responseCode = "429", description = "Limite de requisicoes excedido"),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     })
     @PutMapping("/{id}")
     public Profile update(@Valid @RequestBody Profile o, @PathVariable @Positive Long id) {
@@ -83,8 +110,12 @@ public class ProfileController {
 
     @Operation(summary = "Deletar perfil")
     @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Perfil deletado"),
-            @ApiResponse(responseCode = "404", description = "Perfil nao encontrado")
+            @ApiResponse(responseCode = "204", description = "Perfil deletado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "ID informado e invalido"),
+            @ApiResponse(responseCode = "401", description = "Chave da API invalida ou ausente"),
+            @ApiResponse(responseCode = "404", description = "Perfil nao encontrado"),
+            @ApiResponse(responseCode = "429", description = "Limite de requisicoes excedido"),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     })
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -97,8 +128,12 @@ public class ProfileController {
 
     @Operation(summary = "Buscar perfis por nickname")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Resultados da busca"),
-            @ApiResponse(responseCode = "404", description = "Nenhum perfil encontrado")
+            @ApiResponse(responseCode = "200", description = "Resultados da busca retornados com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Parametro de busca ausente ou invalido"),
+            @ApiResponse(responseCode = "401", description = "Chave da API invalida ou ausente"),
+            @ApiResponse(responseCode = "404", description = "Nenhum perfil encontrado com o nickname informado"),
+            @ApiResponse(responseCode = "429", description = "Limite de requisicoes excedido"),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     })
     @GetMapping("/search")
     public Page<Profile> searchByNickname(@RequestParam String nickname, Pageable p) {
@@ -113,6 +148,8 @@ public class ProfileController {
     private void addLinks(Profile prof) {
         if (!prof.hasLink("self")) {
             prof.add(linkTo(methodOn(ProfileController.class).one(prof.getId())).withSelfRel());
+            prof.add(linkTo(methodOn(ProfileController.class).update(null, prof.getId())).withRel("update"));
+            prof.add(linkTo(methodOn(ProfileController.class).delete(prof.getId())).withRel("delete"));
         }
     }
 }
