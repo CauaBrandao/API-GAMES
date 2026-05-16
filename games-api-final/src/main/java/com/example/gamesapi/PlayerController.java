@@ -17,11 +17,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("/v1/players")
 @Validated
-@Tag(name = "player-controller")
+// 1. DESCRIÇÃO ADICIONADA AQUI PARA PADRONIZAR O SWAGGER
+@Tag(name = "player-controller", description = "Gerenciamento de jogadores")
 public class PlayerController {
 
     private final PlayerRepository r;
-    // 1. Injetamos o nosso serviço de Idempotência aqui
     private final IdempotencyService idempotencyService;
 
     public PlayerController(PlayerRepository r, IdempotencyService idempotencyService) {
@@ -36,14 +36,12 @@ public class PlayerController {
         return page;
     }
 
-    // 2. Trava de Idempotência adicionada no POST!
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Player create(
             @Valid @RequestBody Player o,
             @Parameter(description = "Chave de Idempotência (ex: 12345)") @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
 
-        // Verifica se a chave já foi usada
         if (idempotencyKey != null && idempotencyService.isProcessed(idempotencyKey)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Requisição duplicada bloqueada! Esta chave de idempotência já foi processada.");
         }
@@ -57,7 +55,8 @@ public class PlayerController {
 
     @GetMapping("/{id}")
     public Player one(@PathVariable @Positive Long id) {
-        Player player = r.findById(id).orElseThrow();
+        // 2. AJUSTE DO PROTOCOLO: Retorna 404 se não achar o jogador
+        Player player = r.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Jogador não encontrado!"));
         player.add(linkTo(methodOn(PlayerController.class).one(id)).withSelfRel());
         return player;
     }
@@ -70,5 +69,11 @@ public class PlayerController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable @Positive Long id) { r.deleteById(id); }
+    public void delete(@PathVariable @Positive Long id) {
+        // 3. AJUSTE DO PROTOCOLO: Retorna 404 antes de tentar deletar algo que não existe
+        if (!r.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Jogador não encontrado para exclusão!");
+        }
+        r.deleteById(id);
+    }
 }
